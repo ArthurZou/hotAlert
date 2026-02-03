@@ -41,28 +41,32 @@ dotnet test
 HotAlert/
 ├── src/HotAlert/                      # 主应用程序
 │   ├── App.xaml                       # WPF 应用程序定义
-│   ├── App.xaml.cs                    # 应用程序启动入口，初始化监控服务
+│   ├── App.xaml.cs                    # 应用程序启动入口，初始化服务
 │   ├── MainWindow.xaml                # 主窗口布局
 │   ├── MainWindow.xaml.cs             # 主窗口代码后端
-│   ├── HotAlert.csproj                # 项目配置 (.NET 8.0-windows)
+│   ├── HotAlert.csproj                # 项目配置 (.NET 8.0-windows, UseWindowsForms)
 │   ├── AssemblyInfo.cs                # 程序集信息和主题定义
 │   │
 │   ├── Models/                        # 数据模型层
 │   │   ├── AppConfig.cs               # 应用配置模型 (阈值、颜色、边框宽度等)
+│   │   ├── AlertState.cs              # 警告状态模型 (AlertType枚举、边框宽度)
 │   │   └── ResourceUsageEventArgs.cs  # 资源使用率事件参数 (CPU/内存/时间戳)
 │   │
 │   ├── Services/                      # 业务服务层
 │   │   ├── ResourceMonitor.cs         # CPU/内存监控服务 (3秒采样间隔)
 │   │   ├── ConfigService.cs           # 配置读写服务 (JSON持久化)
-│   │   └── [AlertService.cs]          # 警告管理服务 (待实现)
+│   │   └── AlertService.cs            # 警告管理服务 (协调监控与边框显示)
+│   │
+│   ├── Helpers/                       # 工具类
+│   │   └── ScreenHelper.cs            # 多显示器检测、DPI缩放计算
 │   │
 │   ├── ViewModels/                    # MVVM ViewModel层
 │   │   ├── ViewModelBase.cs           # ViewModel基类 (INotifyPropertyChanged)
 │   │   └── RelayCommand.cs            # 通用命令实现 (ICommand)
 │   │
-│   ├── Views/                         # WPF视图/窗口 (待实现)
-│   │   ├── [SettingsWindow.xaml]      # 设置窗口
-│   │   └── [BorderOverlay.xaml]       # 边框覆盖层窗口
+│   ├── Views/                         # WPF视图/窗口
+│   │   ├── BorderOverlayWindow.xaml   # 边框覆盖层窗口 (透明、置顶)
+│   │   └── [SettingsWindow.xaml]      # 设置窗口 (待实现)
 │   │
 │   └── Resources/                     # 本地化资源 (待实现)
 │       ├── [Strings.zh-CN.resx]       # 中文资源文件
@@ -83,12 +87,13 @@ HotAlert/
 2. **ConfigService**: JSON 配置持久化到 `%AppData%\HotAlert\config.json`，支持加载/保存/更新/重置，配置变更触发 `ConfigChanged` 事件
 3. **ViewModelBase**: MVVM 基类，实现 `INotifyPropertyChanged`，提供 `SetProperty<T>()` 方法
 4. **RelayCommand**: 通用命令实现，支持 `canExecute` 条件
+5. **AlertService**: 警告状态管理，订阅 ResourceMonitor 事件，计算动态边框宽度: `width = minWidth + (usage - threshold) / (100 - threshold) × (maxWidth - minWidth)`，管理 BorderOverlayWindow 窗口集合，支持 `DismissAlert()` 手动关闭警告
+6. **BorderOverlayWindow**: 透明置顶窗口，四边渐变边框 (LinearGradientBrush)，呼吸灯动画 (Opacity 0.7-1.0)，鼠标悬浮显示数值提示
+7. **ScreenHelper**: 使用 `System.Windows.Forms.Screen.AllScreens` 获取所有显示器，通过 Win32 API (GetDpiForMonitor) 计算 DPI 缩放，监听 `SystemEvents.DisplaySettingsChanged` 事件
 
 **待实现:**
-1. **BorderOverlay**: 透明置顶窗口，在所有显示器上显示渐变警告边框
-2. **AlertService**: 警告状态管理，边框宽度计算: `width = minWidth + (currentValue - threshold) / (100 - threshold) × (maxWidth - minWidth)`
-3. **System Tray**: 托盘图标运行，右键菜单
-4. **SettingsWindow**: 设置界面
+1. **System Tray**: 托盘图标运行，右键菜单，点击关闭警告
+2. **SettingsWindow**: 设置界面，阈值/颜色/呼吸速度配置
 
 ### Configuration
 
