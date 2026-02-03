@@ -241,6 +241,46 @@ public partial class BorderOverlayWindow : Window
     }
 
     /// <summary>
+    /// 处理预览鼠标按下事件 - 在路由开始前确保点击穿透
+    /// </summary>
+    protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e)
+    {
+        // 不调用基类方法，让点击穿透
+        // base.OnPreviewMouseDown(e);
+        e.Handled = false;
+    }
+
+    /// <summary>
+    /// 处理预览鼠标抬起事件 - 在路由开始前确保点击穿透
+    /// </summary>
+    protected override void OnPreviewMouseUp(System.Windows.Input.MouseButtonEventArgs e)
+    {
+        // 不调用基类方法，让点击穿透
+        // base.OnPreviewMouseUp(e);
+        e.Handled = false;
+    }
+
+    /// <summary>
+    /// 处理预览鼠标双击事件 - 在路由开始前确保点击穿透
+    /// </summary>
+    protected override void OnPreviewMouseDoubleClick(System.Windows.Input.MouseButtonEventArgs e)
+    {
+        // 不调用基类方法，让点击穿透
+        // base.OnPreviewMouseDoubleClick(e);
+        e.Handled = false;
+    }
+
+    /// <summary>
+    /// 处理预览鼠标滚轮事件 - 在路由开始前确保滚轮穿透
+    /// </summary>
+    protected override void OnPreviewMouseWheel(System.Windows.Input.MouseWheelEventArgs e)
+    {
+        // 不调用基类方法，让滚轮穿透
+        // base.OnPreviewMouseWheel(e);
+        e.Handled = false;
+    }
+
+    /// <summary>
     /// 刷新窗口位置
     /// </summary>
     public void RefreshPosition(ScreenInfo newScreenInfo)

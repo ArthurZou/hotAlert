@@ -19,9 +19,9 @@
         </Storyboard>
     </Window.Resources>
 
-    <Grid x:Name="BorderContainer">
+    <Grid x:Name="BorderContainer" IsHitTestVisible="False">
         <!-- CPU 边框（外层） -->
-        <Grid x:Name="CpuBorderGrid" Visibility="Collapsed">
+        <Grid x:Name="CpuBorderGrid" Visibility="Collapsed" IsHitTestVisible="False">
             <Rectangle x:Name="CpuTopBorder" VerticalAlignment="Top" IsHitTestVisible="False"/>
             <Rectangle x:Name="CpuBottomBorder" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
             <Rectangle x:Name="CpuLeftBorder" HorizontalAlignment="Left" IsHitTestVisible="False"/>
@@ -29,7 +29,7 @@
         </Grid>
 
         <!-- 内存边框（内层） -->
-        <Grid x:Name="MemoryBorderGrid" Visibility="Collapsed">
+        <Grid x:Name="MemoryBorderGrid" Visibility="Collapsed" IsHitTestVisible="False">
             <Rectangle x:Name="MemoryTopBorder" VerticalAlignment="Top" IsHitTestVisible="False"/>
             <Rectangle x:Name="MemoryBottomBorder" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
             <Rectangle x:Name="MemoryLeftBorder" HorizontalAlignment="Left" IsHitTestVisible="False"/>
