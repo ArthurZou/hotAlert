@@ -1,3 +1,5 @@
+**用于测试claude code能力的小项目，没有c#/windows开发经验，所有代码100%都是ai生成。**
+
 # HotAlert - CPU/内存资源监控边框警告工具
 
 <p align="center">
