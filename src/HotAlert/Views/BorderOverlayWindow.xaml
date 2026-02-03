@@ -8,7 +8,7 @@
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        IsHitTestVisible="True">
+        IsHitTestVisible="False">
 
     <Window.Resources>
         <!-- 呼吸灯动画 -->
