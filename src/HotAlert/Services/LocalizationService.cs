@@ -13,9 +13,9 @@ namespace HotAlert.Services;
 public class LocalizationService
 {
     private readonly ConfigService _configService;
-    private ResourceManager? _resourceManager;
+    private readonly ResourceManager _resourceManager;
     private string _currentLanguage;
-    private readonly Dictionary<string, ResourceManager> _resourceManagers = new();
+    private CultureInfo _currentCulture;
 
     /// <summary>
     /// 语言变更事件
@@ -43,26 +43,25 @@ public class LocalizationService
     {
         _configService = configService ?? throw new ArgumentNullException(nameof(configService));
 
-        // 初始化资源管理器
-        InitializeResourceManagers();
+        // 初始化资源管理器（使用单一的 ResourceManager）
+        var assembly = typeof(LocalizationService).Assembly;
+        _resourceManager = new ResourceManager("HotAlert.Resources.Strings", assembly);
 
         // 从配置加载当前语言
         _currentLanguage = _configService.Config.Language;
-        SetCurrentLanguage(_currentLanguage);
+        _currentCulture = GetCultureInfo(_currentLanguage);
     }
 
     /// <summary>
-    /// 初始化资源管理器
+    /// 获取语言对应的 CultureInfo
     /// </summary>
-    private void InitializeResourceManagers()
+    private static CultureInfo GetCultureInfo(string language)
     {
-        var assembly = typeof(LocalizationService).Assembly;
-
-        // 主资源文件（中文）
-        _resourceManagers["zh-CN"] = new ResourceManager("HotAlert.Resources.Strings", assembly);
-
-        // 英文资源文件
-        _resourceManagers["en-US"] = new ResourceManager("HotAlert.Resources.Strings.en-US", assembly);
+        return language switch
+        {
+            "en-US" => new CultureInfo("en-US"),
+            _ => new CultureInfo("zh-CN")
+        };
     }
 
     /// <summary>
@@ -75,7 +74,8 @@ public class LocalizationService
             language = "zh-CN";
         }
 
-        if (!_resourceManagers.ContainsKey(language))
+        // 验证语言是否支持
+        if (language != "zh-CN" && language != "en-US")
         {
             language = "zh-CN"; // 回退到中文
         }
@@ -83,7 +83,7 @@ public class LocalizationService
         if (_currentLanguage != language)
         {
             _currentLanguage = language;
-            _resourceManager = _resourceManagers[language];
+            _currentCulture = GetCultureInfo(language);
 
             // 保存到配置
             _configService.Update(config => config.Language = language);
@@ -98,36 +98,14 @@ public class LocalizationService
     /// </summary>
     public string GetString(string key)
     {
-        if (_resourceManager == null)
-        {
-            SetCurrentLanguage(_currentLanguage);
-        }
-
         try
         {
-            var value = _resourceManager?.GetString(key);
+            var value = _resourceManager.GetString(key, _currentCulture);
             return value ?? $"#{key}";
         }
         catch
         {
             return $"#{key}";
-        }
-    }
-
-    /// <summary>
-    /// 设置当前语言（内部方法）
-    /// </summary>
-    private void SetCurrentLanguage(string language)
-    {
-        if (_resourceManagers.TryGetValue(language, out var rm))
-        {
-            _resourceManager = rm;
-        }
-        else
-        {
-            // 回退到中文
-            _resourceManager = _resourceManagers["zh-CN"];
-            _currentLanguage = "zh-CN";
         }
     }
 
