@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using HotAlert.Helpers;
@@ -31,6 +32,11 @@ public partial class BorderOverlayWindow : Window
     private float _memoryUsage;
     private bool _cpuVisible;
     private bool _memoryVisible;
+
+    // Windows消息常量
+    private const int WM_NCHITTEST = 0x0084;
+    private const int HTTRANSPARENT = -1;
+    private const int HTCLIENT = 1;
 
     public BorderOverlayWindow(ScreenInfo screenInfo)
     {
@@ -257,6 +263,87 @@ public partial class BorderOverlayWindow : Window
             parts.Add($"{memoryLabel}: {_memoryUsage:F0}%");
         }
         TooltipText.Text = string.Join(" | ", parts);
+    }
+
+    /// <summary>
+    /// 重写OnSourceInitialized以添加窗口消息钩子
+    /// </summary>
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        // 添加窗口消息钩子
+        var source = System.Windows.PresentationSource.FromVisual(this) as System.Windows.Interop.HwndSource;
+        source?.AddHook(WndProcHook);
+    }
+
+    /// <summary>
+    /// 窗口消息处理钩子
+    /// </summary>
+    private IntPtr WndProcHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == WM_NCHITTEST)
+        {
+            try
+            {
+                // 检查窗口是否已完全初始化
+                if (ActualWidth <= 0 || ActualHeight <= 0)
+                {
+                    // 窗口未初始化，返回默认处理
+                    return IntPtr.Zero;
+                }
+
+                // 检查是否有边框显示
+                var hasBorder = _cpuVisible || _memoryVisible;
+                if (!hasBorder)
+                {
+                    // 没有边框显示，完全穿透
+                    handled = true;
+                    return new IntPtr(HTTRANSPARENT);
+                }
+
+                // 获取鼠标屏幕坐标
+                var point = new System.Drawing.Point(lParam.ToInt32() & 0xFFFF, (lParam.ToInt32() >> 16) & 0xFFFF);
+                var screenPoint = new System.Windows.Point(point.X, point.Y);
+
+                // 转换为窗口坐标
+                var windowPoint = PointFromScreen(screenPoint);
+
+                // 获取当前边框宽度
+                var borderWidth = Math.Max(_cpuBorderWidth, _memoryBorderWidth);
+
+                // 如果边框宽度太小（小于1像素），直接穿透
+                if (borderWidth < 1.0)
+                {
+                    handled = true;
+                    return new IntPtr(HTTRANSPARENT);
+                }
+
+                // 检测是否在边框区域（加上1像素容差）
+                var isInBorder = windowPoint.X < borderWidth + 1 ||
+                                windowPoint.X > ActualWidth - borderWidth - 1 ||
+                                windowPoint.Y < borderWidth + 1 ||
+                                windowPoint.Y > ActualHeight - borderWidth - 1;
+
+                // 如果在边框区域，让点击穿透；否则作为客户区处理
+                if (isInBorder)
+                {
+                    handled = true;
+                    return new IntPtr(HTTRANSPARENT);
+                }
+
+                // 不在边框区域，作为正常客户区处理（允许鼠标悬停事件）
+                handled = true;
+                return new IntPtr(HTCLIENT);
+            }
+            catch
+            {
+                // 发生异常时返回默认处理
+                return IntPtr.Zero;
+            }
+        }
+
+        return IntPtr.Zero;
     }
 
     private enum GradientDirection
