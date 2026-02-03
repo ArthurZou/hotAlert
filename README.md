@@ -9,6 +9,7 @@
 <p align="center">
   <a href="README.en.md">English</a> | <strong>简体中文</strong>
 </p>
+<img width="2560" height="566" alt="image" src="https://github.com/user-attachments/assets/48f7a8a9-e202-48ae-ab76-8f16b0d8e96c" />
 
 ## 📋 概述
 
