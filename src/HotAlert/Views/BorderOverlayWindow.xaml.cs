@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using HotAlert.Helpers;
@@ -31,6 +32,11 @@ public partial class BorderOverlayWindow : Window
     private float _memoryUsage;
     private bool _cpuVisible;
     private bool _memoryVisible;
+
+    // Windows消息常量
+    private const int WM_NCHITTEST = 0x0084;
+    private const int HTTRANSPARENT = -1;
+    private const int HTCLIENT = 1;
 
     public BorderOverlayWindow(ScreenInfo screenInfo)
     {
@@ -278,6 +284,74 @@ public partial class BorderOverlayWindow : Window
         // 不调用基类方法，让滚轮穿透
         // base.OnPreviewMouseWheel(e);
         e.Handled = false;
+    }
+
+    /// <summary>
+    /// 重写OnSourceInitialized以添加窗口消息钩子
+    /// </summary>
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        // 添加窗口消息钩子
+        var source = System.Windows.PresentationSource.FromVisual(this) as System.Windows.Interop.HwndSource;
+        source?.AddHook(WndProcHook);
+    }
+
+    /// <summary>
+    /// 窗口消息处理钩子 - 简化版本，避免影响监控功能
+    /// </summary>
+    private IntPtr WndProcHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        // 仅处理WM_NCHITTEST消息
+        if (msg == WM_NCHITTEST)
+        {
+            // 基本检查：窗口是否初始化
+            if (ActualWidth <= 0 || ActualHeight <= 0)
+            {
+                return IntPtr.Zero;
+            }
+
+            // 获取鼠标屏幕坐标
+            var point = new System.Drawing.Point(lParam.ToInt32() & 0xFFFF, (lParam.ToInt32() >> 16) & 0xFFFF);
+            var screenPoint = new System.Windows.Point(point.X, point.Y);
+
+            // 转换为窗口坐标
+            var windowPoint = PointFromScreen(screenPoint);
+
+            // 获取当前边框宽度（如果有边框显示）
+            var borderWidth = Math.Max(_cpuBorderWidth, _memoryBorderWidth);
+            var hasBorder = _cpuVisible || _memoryVisible;
+
+            if (!hasBorder || borderWidth < 1.0)
+            {
+                // 没有边框或边框太小，完全穿透
+                handled = true;
+                return new IntPtr(HTTRANSPARENT);
+            }
+
+            // 检测是否在边框区域
+            var isInBorder = windowPoint.X < borderWidth ||
+                            windowPoint.X > ActualWidth - borderWidth ||
+                            windowPoint.Y < borderWidth ||
+                            windowPoint.Y > ActualHeight - borderWidth;
+
+            if (isInBorder)
+            {
+                // 边框区域：点击穿透
+                handled = true;
+                return new IntPtr(HTTRANSPARENT);
+            }
+            else
+            {
+                // 非边框区域：正常客户区，允许鼠标悬停
+                handled = true;
+                return new IntPtr(HTCLIENT);
+            }
+        }
+
+        // 其他消息不处理，交给默认处理
+        return IntPtr.Zero;
     }
 
     /// <summary>
