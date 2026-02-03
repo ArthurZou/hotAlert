@@ -1,124 +1,128 @@
-# HotAlert - CPU/Memory Resource Monitor with Border Warnings
+# HotAlert - CPU/内存资源监控边框警告工具
 
 <p align="center">
-  <strong>A Windows desktop application that displays colored border warnings when CPU or memory usage exceeds thresholds</strong>
+  <strong>一款当 CPU 或内存使用率超过阈值时显示彩色边框警告的 Windows 桌面应用</strong>
 </p>
 
-## 📋 Overview
+<p align="center">
+  <a href="README.en.md">English</a> | <strong>简体中文</strong>
+</p>
 
-HotAlert is a Windows desktop CPU/memory monitoring tool that displays prominent colored border warnings around your screen(s) when resource usage exceeds user-defined thresholds. Inspired by navigation app speed warnings, it provides a clear visual alert without interrupting your workflow.
+## 📋 概述
 
-**Core Concept**: When CPU or memory usage crosses the configured threshold, colored borders appear on all edges of all monitors, with width proportional to the severity of over-usage.
+HotAlert 是一款 Windows 桌面 CPU/内存监控工具，当资源使用率超过用户设定的阈值时，会在屏幕四周显示醒目的彩色边框警告。灵感来源于导航应用的超速警告，它能在不打断你工作流程的情况下提供清晰的视觉提醒。
 
-## ✨ Key Features
+**核心概念**：当 CPU 或内存使用率超过设定阈值时，所有显示器的四边都会出现彩色边框，边框宽度与超限程度成正比。
 
-### 🖥️ **Multi-Monitor Support**
-- Displays warning borders on **all connected monitors** simultaneously
-- Automatically detects monitor changes (add/remove)
-- Supports high DPI scaling with DPI-aware border width calculation
+## ✨ 主要功能
 
-### 🎨 **Visual Warning System**
-- **Dynamic Border Width**: Borders grow wider as usage increases beyond threshold
-  - Formula: `width = minWidth + (usage - threshold) / (100 - threshold) × (maxWidth - minWidth)`
-- **Breathing Animation**: Gentle pulsing effect (opacity 0.7-1.0 cycle)
-- **Gradient Borders**: Smooth color gradient from edge to transparent interior
-- **Color-Coded Alerts**:
-  - CPU warnings: Red (default #FF4444)
-  - Memory warnings: Orange (default #FF8C00)
-  - Both resources over threshold: Both colors displayed simultaneously
+### 🖥️ **多显示器支持**
+- 在**所有已连接的显示器**上同时显示警告边框
+- 自动检测显示器变化（添加/移除）
+- 支持高 DPI 缩放，边框宽度自适应计算
 
-### 🖱️ **Interactive Features**
-- **Hover Information**: Mouse over borders to see exact usage percentages
-- **Manual Dismissal**: Click system tray icon to dismiss current warnings
-- **Persistent Warnings**: Borders remain visible until manually dismissed (even if usage drops below threshold)
-- **Re-triggering**: Warnings reappear if thresholds are exceeded again after dismissal
+### 🎨 **视觉警告系统**
+- **动态边框宽度**：使用率越高，边框越宽
+  - 计算公式：`宽度 = 最小宽度 + (使用率 - 阈值) / (100 - 阈值) × (最大宽度 - 最小宽度)`
+- **呼吸灯动画**：柔和的脉冲效果（透明度 0.7-1.0 循环）
+- **渐变边框**：从边缘到内部平滑过渡的颜色渐变
+- **颜色区分**：
+  - CPU 警告：红色（默认 #FF4444）
+  - 内存警告：橙色（默认 #FF8C00）
+  - 两者同时超标：同时显示两种颜色
 
-### ⚙️ **Customizable Settings**
-- **Threshold Configuration**: Separate sliders for CPU (0-100%) and memory (0-100%)
-- **Border Customization**: Adjust minimum and maximum border widths (pixels)
-- **Color Picker**: Customize warning colors for CPU and memory
-- **Breathing Speed**: Adjust animation speed (Slow/Medium/Fast)
-- **Auto-Start**: Option to launch on Windows startup
-- **Language Support**: Switch between Chinese and English
+### 🖱️ **交互功能**
+- **悬停信息**：鼠标悬停在边框上可查看精确的使用率百分比
+- **手动关闭**：点击系统托盘图标关闭当前警告
+- **持续警告**：边框会一直显示直到手动关闭（即使使用率降至阈值以下）
+- **重新触发**：关闭警告后，如果再次超过阈值会重新显示警告
 
-### 📊 **System Integration**
-- **System Tray Icon**: Always-visible tray icon with status indication (normal/warning)
-- **Right-Click Menu**:
-  - Dismiss Warning (when active)
-  - Open Settings
-  - Switch Language
-  - Toggle Auto-Start
-  - Exit Application
-- **Configuration Persistence**: Automatic JSON configuration file storage
+### ⚙️ **自定义设置**
+- **阈值配置**：CPU 和内存分别设置（0-100%）
+- **边框自定义**：调整最小和最大边框宽度（像素）
+- **颜色选择器**：自定义 CPU 和内存的警告颜色
+- **呼吸灯速度**：调整动画速度（慢速/中速/快速）
+- **开机自启**：可选择开机自动启动
+- **多语言支持**：支持中英文切换
 
-## 🚀 Installation & Usage
+### 📊 **系统集成**
+- **系统托盘图标**：常驻托盘图标，显示状态（正常/警告）
+- **右键菜单**：
+  - 关闭警告（警告激活时）
+  - 打开设置
+  - 切换语言
+  - 开机自启开关
+  - 退出应用
+- **配置持久化**：自动保存 JSON 配置文件
 
-### **Portable Version (Recommended)**
-1. Download the latest `HotAlert.exe` from [Releases](#) (or build from source)
-2. Place the executable in any directory
-3. Double-click to run
-4. Configuration is automatically created at `%AppData%\HotAlert\config.json`
+## 🚀 安装与使用
 
-### **Installer Version**
-1. Run the Inno Setup installer (`HotAlert_Setup.exe`)
-2. Follow the installation wizard
-3. Options include:
-   - Desktop shortcut creation
-   - Start menu entry
-   - Auto-start registration
-   - Post-installation launch
+### **便携版（推荐）**
+1. 从 [Releases](https://github.com/ArthurZou/hotAlert/releases) 下载最新的 `HotAlert.exe`（或从源码构建）
+2. 将可执行文件放在任意目录
+3. 双击运行
+4. 配置文件自动创建在 `%AppData%\HotAlert\config.json`
 
-### **Running the Application**
-- On first run, the application minimizes to system tray
-- Right-click the tray icon to access settings and controls
-- Default thresholds: CPU 80%, Memory 80%
-- Borders appear automatically when thresholds are exceeded
+### **安装包版本**
+1. 运行 Inno Setup 安装程序（[HotAlert_Setup.exe](https://github.com/ArthurZou/hotAlert/releases)）
+2. 按照安装向导操作
+3. 可选项包括：
+   - 创建桌面快捷方式
+   - 添加开始菜单项
+   - 注册开机自启
+   - 安装后启动
 
-## 🔧 Building from Source
+### **运行应用**
+- 首次运行时，应用会最小化到系统托盘
+- 右键点击托盘图标访问设置和控制选项
+- 默认阈值：CPU 80%，内存 80%
+- 超过阈值时边框自动出现
 
-### **Prerequisites**
-- .NET 8.0 SDK or later
+## 🔧 从源码构建
+
+### **前置要求**
+- .NET 8.0 SDK 或更高版本
 - Windows 10/11
-- Visual Studio 2022 or VS Code (optional)
+- Visual Studio 2022 或 VS Code（可选）
 
-### **Build Commands**
+### **构建命令**
 ```bash
-# Restore dependencies
+# 还原依赖
 dotnet restore
 
-# Build the project
+# 构建项目
 dotnet build
 
-# Run the application
+# 运行应用
 dotnet run --project src/HotAlert/HotAlert.csproj
 
-# Build release version (single file)
+# 构建发布版本（单文件）
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 
-# Run tests
+# 运行测试
 dotnet test
 ```
 
-### **Publishing**
+### **发布**
 ```bash
-# Using the publish script (recommended)
+# 使用发布脚本（推荐）
 publish.cmd
 
-# Manual publish command
+# 手动发布命令
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:PublishReadyToRun=true
 ```
 
-**Output Locations:**
-- Portable version: `publish/portable/HotAlert.exe` (single file, ~75.6 MB)
-- Full version: `publish/win-x64/` (includes all dependency files)
-- Installer: Generated via `installer/HotAlert.iss` (Inno Setup)
+**输出位置：**
+- 便携版：`publish/portable/HotAlert.exe`（单文件，约 75.6 MB）
+- 完整版：`publish/win-x64/`（包含所有依赖文件）
+- 安装包：通过 `installer/HotAlert.iss`（Inno Setup）生成
 
-## ⚙️ Configuration
+## ⚙️ 配置说明
 
-### **Configuration File**
-Location: `%AppData%\HotAlert\config.json`
+### **配置文件**
+位置：`%AppData%\HotAlert\config.json`
 
-Default Configuration:
+默认配置：
 ```json
 {
   "cpuThreshold": 80,
@@ -133,129 +137,129 @@ Default Configuration:
 }
 ```
 
-### **Settings Window**
-Access via tray icon right-click menu → "Settings"
-- Most settings take effect immediately without restart
-- Real-time preview of border appearance changes
-- Language switching requires application restart
+### **设置界面**
+通过托盘图标右键菜单 → "设置" 打开
+- 大多数设置无需重启即可生效
+- 边框外观更改支持实时预览
+- 语言切换需要重启应用
 
-## 🏗️ Architecture
+## 🏗️ 架构设计
 
-### **Technology Stack**
-- **Framework**: C# WPF (.NET 8.0-windows)
-- **Platform**: Windows 10/11
-- **UI Style**: Windows native style, follows system theme
-- **Architecture**: MVVM (Model-View-ViewModel)
-- **Configuration**: JSON (System.Text.Json)
-- **System Monitoring**: PerformanceCounter API + Win32 API
+### **技术栈**
+- **框架**：C# WPF (.NET 8.0-windows)
+- **平台**：Windows 10/11
+- **UI 风格**：Windows 原生风格，跟随系统主题
+- **架构模式**：MVVM (Model-View-ViewModel)
+- **配置存储**：JSON (System.Text.Json)
+- **系统监控**：PerformanceCounter API + Win32 API
 
-### **Key Components**
-| Component | Purpose |
-|-----------|---------|
-| `ResourceMonitor` | Monitors CPU/memory usage with 3-second sampling |
-| `AlertService` | Manages warning states and border display logic |
-| `ConfigService` | Handles JSON configuration persistence |
-| `BorderOverlayWindow` | Transparent top-most window for border display |
-| `TrayService` | System tray icon and menu management |
-| `AutoStartService` | Registry-based startup configuration |
-| `LocalizationService` | Chinese/English language switching |
-| `ScreenHelper` | Multi-monitor detection and DPI scaling |
+### **核心组件**
+| 组件 | 功能 |
+|------|------|
+| `ResourceMonitor` | 监控 CPU/内存使用率，3 秒采样间隔 |
+| `AlertService` | 管理警告状态和边框显示逻辑 |
+| `ConfigService` | 处理 JSON 配置持久化 |
+| `BorderOverlayWindow` | 用于显示边框的透明置顶窗口 |
+| `TrayService` | 系统托盘图标和菜单管理 |
+| `AutoStartService` | 基于注册表的开机自启配置 |
+| `LocalizationService` | 中英文语言切换 |
+| `ScreenHelper` | 多显示器检测和 DPI 缩放 |
 
-## 🎯 Performance Targets
+## 🎯 性能指标
 
-| Metric | Target Value |
-|--------|--------------|
-| Memory Usage | < 100 MB |
-| CPU Usage (idle) | < 1% |
-| Startup Time | < 2 seconds |
-| Monitoring Interval | 3 seconds |
+| 指标 | 目标值 |
+|------|--------|
+| 内存占用 | < 100 MB |
+| CPU 占用（空闲时） | < 1% |
+| 启动时间 | < 2 秒 |
+| 监控间隔 | 3 秒 |
 
-## 📁 Project Structure
+## 📁 项目结构
 
 ```
 HotAlert/
-├── src/HotAlert/                      # Main application
-│   ├── Models/                        # Data models (AppConfig, AlertState, etc.)
-│   ├── Services/                      # Business services (monitoring, config, alerts)
+├── src/HotAlert/                      # 主应用程序
+│   ├── Models/                        # 数据模型（AppConfig、AlertState 等）
+│   ├── Services/                      # 业务服务（监控、配置、警告）
 │   ├── ViewModels/                    # MVVM ViewModels
-│   ├── Views/                         # WPF windows (Settings, BorderOverlay)
-│   ├── Helpers/                       # Utility classes (ScreenHelper, TranslationSource)
-│   ├── Converters/                    # WPF value converters
-│   └── Resources/                     # Localization resources
-├── installer/                         # Inno Setup installer configuration
-├── publish/                           # Build output directories
-├── scripts/                           # Utility scripts
-├── tests/                             # Test projects (to be implemented)
-├── SPEC.md                            # Product specification document
-├── CLAUDE.md                          # Claude Code development guide
-├── milestone.md                       # Development milestone tracking
-└── publish.cmd                        # Publish script
+│   ├── Views/                         # WPF 窗口（设置、边框覆盖层）
+│   ├── Helpers/                       # 工具类（ScreenHelper、TranslationSource）
+│   ├── Converters/                    # WPF 值转换器
+│   └── Resources/                     # 本地化资源
+├── installer/                         # Inno Setup 安装包配置
+├── publish/                           # 构建输出目录
+├── scripts/                           # 工具脚本
+├── tests/                             # 测试项目（待实现）
+├── SPEC.md                            # 产品规格文档
+├── CLAUDE.md                          # Claude Code 开发指南
+├── milestone.md                       # 开发里程碑跟踪
+└── publish.cmd                        # 发布脚本
 ```
 
-## 📊 Project Status
+## 📊 项目状态
 
-### **Completed Milestones**
-1. ✓ Project foundation (M1)
-2. ✓ Core resource monitoring (M2)
-3. ✓ Border warning display (M3)
-4. ✓ System tray functionality (M4)
-5. ✓ Settings interface (M5)
-6. ✓ Multi-language support (M6 partially)
+### **已完成的里程碑**
+1. ✓ 项目基础架构 (M1)
+2. ✓ 核心资源监控 (M2)
+3. ✓ 边框警告显示 (M3)
+4. ✓ 系统托盘功能 (M4)
+5. ✓ 设置界面 (M5)
+6. ✓ 多语言支持 (M6 部分)
 
-### **Development Progress**
-Core features are fully implemented:
-- Multi-monitor warnings
-- System tray with context menu
-- Settings interface with real-time preview
-- Chinese/English language switching
-- Configuration persistence
+### **开发进度**
+核心功能已全部实现：
+- 多显示器警告
+- 带右键菜单的系统托盘
+- 支持实时预览的设置界面
+- 中英文切换
+- 配置持久化
 
-### **Planned Enhancements**
-- [ ] Comprehensive test suite
-- [ ] Performance optimization verification
-- [ ] Installer package refinement
-- [ ] Additional language support
-- [ ] Theme customization options
+### **计划中的改进**
+- [ ] 完善测试套件
+- [ ] 性能优化验证
+- [ ] 安装包完善
+- [ ] 更多语言支持
+- [ ] 主题自定义选项
 
-## ❓ Frequently Asked Questions
+## ❓ 常见问题
 
-### **Q: Does HotAlert require administrator privileges?**
-**A:** No, it runs without elevated permissions using standard Windows APIs.
+### **Q：HotAlert 需要管理员权限吗？**
+**A：** 不需要，它使用标准 Windows API 运行，无需提升权限。
 
-### **Q: Can I use HotAlert with fullscreen applications/games?**
-**A:** Yes, borders display on top of fullscreen applications (Topmost window property).
+### **Q：HotAlert 能用于全屏应用/游戏吗？**
+**A：** 可以，边框会显示在全屏应用之上（使用 Topmost 窗口属性）。
 
-### **Q: What happens when I disconnect/connect a monitor?**
-**A:** HotAlert automatically detects display changes and adjusts border positioning accordingly.
+### **Q：断开/连接显示器时会怎样？**
+**A：** HotAlert 会自动检测显示器变化并相应调整边框位置。
 
-### **Q: Can I monitor other resources like disk or network?**
-**A:** Not currently. HotAlert focuses on CPU and memory monitoring only.
+### **Q：可以监控其他资源如磁盘或网络吗？**
+**A：** 目前不行。HotAlert 仅专注于 CPU 和内存监控。
 
-### **Q: Does the application make any sounds?**
-**A:** No, HotAlert is purely visual. No audio alerts are generated.
+### **Q：应用会发出声音吗？**
+**A：** 不会，HotAlert 是纯视觉提醒，不会产生任何音频警告。
 
-## 🔒 Privacy & Security
+## 🔒 隐私与安全
 
-- **No Data Collection**: HotAlert does not collect or transmit any usage data
-- **Local Configuration**: All settings stored locally in `%AppData%\HotAlert\`
-- **No Internet Access**: The application does not require network connectivity
-- **Open Source**: Full source code available for inspection
+- **无数据收集**：HotAlert 不收集或传输任何使用数据
+- **本地配置**：所有设置本地存储在 `%AppData%\HotAlert\`
+- **无需联网**：应用不需要网络连接
+- **开源透明**：完整源代码可供查阅
 
-## 🤝 Contributing
+## 🤝 参与贡献
 
-While this project was AI-generated as a Claude Code capability demonstration, suggestions and improvements are welcome:
+虽然这个项目是作为 Claude Code 能力演示由 AI 生成的，但欢迎提出建议和改进：
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+1. Fork 本仓库
+2. 创建功能分支
+3. 进行修改
+4. 提交 Pull Request
 
-Please ensure any contributions align with the project's scope and architecture.
+请确保任何贡献都符合项目的范围和架构。
 
-## 📄 License
+## 📄 许可证
 
-This project is provided for educational and demonstration purposes. All code was generated by AI (Claude) as a test of Claude Code capabilities.
+本项目用于教育和演示目的。所有代码均由 AI（Claude）生成，作为 Claude Code 能力的测试。
 
 ---
 
-**HotAlert** - Keep your system resources in check with clear visual warnings!
+**HotAlert** - 用清晰的视觉警告让你的系统资源尽在掌控！
