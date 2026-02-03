@@ -8,7 +8,7 @@
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        IsHitTestVisible="True">
+        IsHitTestVisible="False">
 
     <Window.Resources>
         <!-- 呼吸灯动画 -->
@@ -19,21 +19,21 @@
         </Storyboard>
     </Window.Resources>
 
-    <Grid x:Name="BorderContainer" IsHitTestVisible="False">
+    <Grid x:Name="BorderContainer">
         <!-- CPU 边框（外层） -->
-        <Grid x:Name="CpuBorderGrid" Visibility="Collapsed" IsHitTestVisible="False">
-            <Rectangle x:Name="CpuTopBorder" VerticalAlignment="Top" IsHitTestVisible="False"/>
-            <Rectangle x:Name="CpuBottomBorder" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
-            <Rectangle x:Name="CpuLeftBorder" HorizontalAlignment="Left" IsHitTestVisible="False"/>
-            <Rectangle x:Name="CpuRightBorder" HorizontalAlignment="Right" IsHitTestVisible="False"/>
+        <Grid x:Name="CpuBorderGrid" Visibility="Collapsed">
+            <Rectangle x:Name="CpuTopBorder" VerticalAlignment="Top"/>
+            <Rectangle x:Name="CpuBottomBorder" VerticalAlignment="Bottom"/>
+            <Rectangle x:Name="CpuLeftBorder" HorizontalAlignment="Left"/>
+            <Rectangle x:Name="CpuRightBorder" HorizontalAlignment="Right"/>
         </Grid>
 
         <!-- 内存边框（内层） -->
-        <Grid x:Name="MemoryBorderGrid" Visibility="Collapsed" IsHitTestVisible="False">
-            <Rectangle x:Name="MemoryTopBorder" VerticalAlignment="Top" IsHitTestVisible="False"/>
-            <Rectangle x:Name="MemoryBottomBorder" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
-            <Rectangle x:Name="MemoryLeftBorder" HorizontalAlignment="Left" IsHitTestVisible="False"/>
-            <Rectangle x:Name="MemoryRightBorder" HorizontalAlignment="Right" IsHitTestVisible="False"/>
+        <Grid x:Name="MemoryBorderGrid" Visibility="Collapsed">
+            <Rectangle x:Name="MemoryTopBorder" VerticalAlignment="Top"/>
+            <Rectangle x:Name="MemoryBottomBorder" VerticalAlignment="Bottom"/>
+            <Rectangle x:Name="MemoryLeftBorder" HorizontalAlignment="Left"/>
+            <Rectangle x:Name="MemoryRightBorder" HorizontalAlignment="Right"/>
         </Grid>
 
         <!-- 悬浮提示 -->

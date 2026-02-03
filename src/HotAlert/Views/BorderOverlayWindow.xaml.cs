@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using HotAlert.Helpers;
@@ -7,7 +8,6 @@ using HotAlert.Services;
 using Color = System.Windows.Media.Color;
 using Colors = System.Windows.Media.Colors;
 using Duration = System.Windows.Duration;
-using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Thickness = System.Windows.Thickness;
@@ -33,10 +33,16 @@ public partial class BorderOverlayWindow : Window
     private bool _cpuVisible;
     private bool _memoryVisible;
 
-    // Windows消息常量
-    private const int WM_NCHITTEST = 0x0084;
-    private const int HTTRANSPARENT = -1;
-    private const int HTCLIENT = 1;
+    // Win32 API 常量
+    private const int GWL_EXSTYLE = -20;
+    private const int WS_EX_TRANSPARENT = 0x00000020;
+    private const int WS_EX_LAYERED = 0x00080000;
+
+    [DllImport("user32.dll")]
+    private static extern int GetWindowLong(IntPtr hwnd, int index);
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
 
     public BorderOverlayWindow(ScreenInfo screenInfo)
     {
@@ -184,174 +190,17 @@ public partial class BorderOverlayWindow : Window
         }
     }
 
-    protected override void OnMouseMove(MouseEventArgs e)
-    {
-        base.OnMouseMove(e);
-
-        var pos = e.GetPosition(this);
-        var borderWidth = Math.Max(_cpuBorderWidth, _memoryBorderWidth);
-
-        // 检测鼠标是否在边框区域
-        var isInBorder = pos.X < borderWidth ||
-                        pos.X > ActualWidth - borderWidth ||
-                        pos.Y < borderWidth ||
-                        pos.Y > ActualHeight - borderWidth;
-
-        TooltipPopup.IsOpen = isInBorder && (_cpuVisible || _memoryVisible);
-    }
-
-    protected override void OnMouseLeave(MouseEventArgs e)
-    {
-        base.OnMouseLeave(e);
-        TooltipPopup.IsOpen = false;
-    }
-
     /// <summary>
-    /// 处理鼠标按下事件 - 确保点击穿透
-    /// </summary>
-    protected override void OnMouseDown(System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // 不调用基类方法，让点击穿透
-        // base.OnMouseDown(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 处理鼠标抬起事件 - 确保点击穿透
-    /// </summary>
-    protected override void OnMouseUp(System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // 不调用基类方法，让点击穿透
-        // base.OnMouseUp(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 处理鼠标双击事件 - 确保点击穿透
-    /// </summary>
-    protected override void OnMouseDoubleClick(System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // 不调用基类方法，让点击穿透
-        // base.OnMouseDoubleClick(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 处理鼠标滚轮事件 - 确保滚轮穿透
-    /// </summary>
-    protected override void OnMouseWheel(System.Windows.Input.MouseWheelEventArgs e)
-    {
-        // 不调用基类方法，让滚轮穿透
-        // base.OnMouseWheel(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 处理预览鼠标按下事件 - 在路由开始前确保点击穿透
-    /// </summary>
-    protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // 不调用基类方法，让点击穿透
-        // base.OnPreviewMouseDown(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 处理预览鼠标抬起事件 - 在路由开始前确保点击穿透
-    /// </summary>
-    protected override void OnPreviewMouseUp(System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // 不调用基类方法，让点击穿透
-        // base.OnPreviewMouseUp(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 处理预览鼠标双击事件 - 在路由开始前确保点击穿透
-    /// </summary>
-    protected override void OnPreviewMouseDoubleClick(System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // 不调用基类方法，让点击穿透
-        // base.OnPreviewMouseDoubleClick(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 处理预览鼠标滚轮事件 - 在路由开始前确保滚轮穿透
-    /// </summary>
-    protected override void OnPreviewMouseWheel(System.Windows.Input.MouseWheelEventArgs e)
-    {
-        // 不调用基类方法，让滚轮穿透
-        // base.OnPreviewMouseWheel(e);
-        e.Handled = false;
-    }
-
-    /// <summary>
-    /// 重写OnSourceInitialized以添加窗口消息钩子
+    /// 重写OnSourceInitialized以设置窗口点击穿透
     /// </summary>
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
 
-        // 添加窗口消息钩子
-        var source = System.Windows.PresentationSource.FromVisual(this) as System.Windows.Interop.HwndSource;
-        source?.AddHook(WndProcHook);
-    }
-
-    /// <summary>
-    /// 窗口消息处理钩子 - 简化版本，避免影响监控功能
-    /// </summary>
-    private IntPtr WndProcHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-    {
-        // 仅处理WM_NCHITTEST消息
-        if (msg == WM_NCHITTEST)
-        {
-            // 基本检查：窗口是否初始化
-            if (ActualWidth <= 0 || ActualHeight <= 0)
-            {
-                return IntPtr.Zero;
-            }
-
-            // 获取鼠标屏幕坐标
-            var point = new System.Drawing.Point(lParam.ToInt32() & 0xFFFF, (lParam.ToInt32() >> 16) & 0xFFFF);
-            var screenPoint = new System.Windows.Point(point.X, point.Y);
-
-            // 转换为窗口坐标
-            var windowPoint = PointFromScreen(screenPoint);
-
-            // 获取当前边框宽度（如果有边框显示）
-            var borderWidth = Math.Max(_cpuBorderWidth, _memoryBorderWidth);
-            var hasBorder = _cpuVisible || _memoryVisible;
-
-            if (!hasBorder || borderWidth < 1.0)
-            {
-                // 没有边框或边框太小，完全穿透
-                handled = true;
-                return new IntPtr(HTTRANSPARENT);
-            }
-
-            // 检测是否在边框区域
-            var isInBorder = windowPoint.X < borderWidth ||
-                            windowPoint.X > ActualWidth - borderWidth ||
-                            windowPoint.Y < borderWidth ||
-                            windowPoint.Y > ActualHeight - borderWidth;
-
-            if (isInBorder)
-            {
-                // 边框区域：点击穿透
-                handled = true;
-                return new IntPtr(HTTRANSPARENT);
-            }
-            else
-            {
-                // 非边框区域：正常客户区，允许鼠标悬停
-                handled = true;
-                return new IntPtr(HTCLIENT);
-            }
-        }
-
-        // 其他消息不处理，交给默认处理
-        return IntPtr.Zero;
+        // 获取窗口句柄并设置 WS_EX_TRANSPARENT 样式实现点击穿透
+        var hwnd = new WindowInteropHelper(this).Handle;
+        var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
     }
 
     /// <summary>
