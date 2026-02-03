@@ -21,22 +21,18 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=..\LICENSE
-InfoBeforeFile=..\README.md
+; InfoBeforeFile=..\README.md
 OutputDir=..\installer\output
 OutputBaseFilename=HotAlert-Setup
-SetupIconFile=..\src\HotAlert\icon.ico
+; SetupIconFile=..\src\HotAlert\icon.ico
 Compression=lzma2/ultra
 SolidCompression=yes
 WizardStyle=modern
-
-; 多语言支持
-Languages=chinesesimp,english
 
 ; 架构
 ArchitecturesInstallIn64BitMode=x64
 
 [Languages]
-Name: "chinesesimp"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
