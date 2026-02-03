@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converters="clr-namespace:HotAlert.Converters"
         xmlns:vm="clr-namespace:HotAlert.ViewModels"
-        Title="HotAlert 设置"
+        xmlns:helpers="clr-namespace:HotAlert.Helpers"
+        Title="{helpers:Loc SettingsWindowTitle}"
         Width="450" Height="580"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
@@ -53,7 +54,7 @@
                 <!-- 阈值设置 -->
                 <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="阈值设置" Style="{StaticResource GroupHeaderStyle}"/>
+                        <TextBlock Text="{helpers:Loc GroupThreshold}" Style="{StaticResource GroupHeaderStyle}"/>
 
                         <!-- CPU 阈值 -->
                         <Grid Margin="0,0,0,10">
@@ -62,7 +63,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="50"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="CPU 阈值" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Column="0" Text="{helpers:Loc LabelCpuThreshold}" Style="{StaticResource LabelStyle}"/>
                             <Slider Grid.Column="1"
                                     Value="{Binding CpuThreshold}"
                                     Minimum="10" Maximum="100"
@@ -80,7 +81,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="50"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="内存阈值" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Column="0" Text="{helpers:Loc LabelMemoryThreshold}" Style="{StaticResource LabelStyle}"/>
                             <Slider Grid.Column="1"
                                     Value="{Binding MemoryThreshold}"
                                     Minimum="10" Maximum="100"
@@ -96,7 +97,7 @@
                 <!-- 边框设置 -->
                 <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="边框设置" Style="{StaticResource GroupHeaderStyle}"/>
+                        <TextBlock Text="{helpers:Loc GroupBorder}" Style="{StaticResource GroupHeaderStyle}"/>
 
                         <!-- 最小宽度 -->
                         <Grid Margin="0,0,0,10">
@@ -105,7 +106,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="50"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="最小宽度" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Column="0" Text="{helpers:Loc LabelMinWidth}" Style="{StaticResource LabelStyle}"/>
                             <Slider Grid.Column="1"
                                     Value="{Binding BorderMinWidth}"
                                     Minimum="5" Maximum="30"
@@ -123,7 +124,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="50"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="最大宽度" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Column="0" Text="{helpers:Loc LabelMaxWidth}" Style="{StaticResource LabelStyle}"/>
                             <Slider Grid.Column="1"
                                     Value="{Binding BorderMaxWidth}"
                                     Minimum="20" Maximum="100"
@@ -139,12 +140,12 @@
                 <!-- 颜色设置 -->
                 <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="颜色设置" Style="{StaticResource GroupHeaderStyle}"/>
+                        <TextBlock Text="{helpers:Loc GroupColor}" Style="{StaticResource GroupHeaderStyle}"/>
 
                         <!-- CPU 颜色 -->
                         <StackPanel Margin="0,0,0,15">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <TextBlock Text="CPU 警告颜色" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock Text="{helpers:Loc LabelCpuColor}" Style="{StaticResource LabelStyle}"/>
                                 <Border Width="24" Height="24" CornerRadius="4"
                                         Background="{Binding CpuColor, Converter={StaticResource ColorToBrushConverter}}"
                                         BorderBrush="#CCC" BorderThickness="1"/>
@@ -173,7 +174,7 @@
                         <!-- 内存颜色 -->
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <TextBlock Text="内存警告颜色" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock Text="{helpers:Loc LabelMemoryColor}" Style="{StaticResource LabelStyle}"/>
                                 <Border Width="24" Height="24" CornerRadius="4"
                                         Background="{Binding MemoryColor, Converter={StaticResource ColorToBrushConverter}}"
                                         BorderBrush="#CCC" BorderThickness="1"/>
@@ -204,13 +205,13 @@
                 <!-- 动画设置 -->
                 <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="动画设置" Style="{StaticResource GroupHeaderStyle}"/>
+                        <TextBlock Text="{helpers:Loc GroupAnimation}" Style="{StaticResource GroupHeaderStyle}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="100"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="呼吸灯速度" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Column="0" Text="{helpers:Loc LabelBreathSpeed}" Style="{StaticResource LabelStyle}"/>
                             <ComboBox Grid.Column="1"
                                       ItemsSource="{Binding BreathSpeedOptions}"
                                       SelectedValue="{Binding BreathSpeed}"
@@ -224,15 +225,35 @@
                 <!-- 系统设置 -->
                 <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="系统设置" Style="{StaticResource GroupHeaderStyle}"/>
-                        <CheckBox Content="开机自启动"
+                        <TextBlock Text="{helpers:Loc GroupSystem}" Style="{StaticResource GroupHeaderStyle}"/>
+                        <CheckBox Content="{helpers:Loc CheckBoxAutoStart}"
                                   IsChecked="{Binding AutoStart}"
                                   VerticalContentAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
+                <!-- 语言设置 -->
+                <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="{helpers:Loc GroupLanguage}" Style="{StaticResource GroupHeaderStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{helpers:Loc LabelLanguage}" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding LanguageOptions}"
+                                      SelectedValue="{Binding Language}"
+                                      SelectedValuePath="Value"
+                                      DisplayMemberPath="DisplayName"
+                                      Width="120" HorizontalAlignment="Left"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
                 <!-- 底部操作 -->
-                <Button Content="恢复默认设置"
+                <Button Content="{helpers:Loc ButtonReset}"
                         Command="{Binding ResetCommand}"
                         HorizontalAlignment="Left"
                         Padding="15,8"/>

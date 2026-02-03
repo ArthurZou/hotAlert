@@ -9,6 +9,7 @@ namespace HotAlert.ViewModels;
 public class SettingsViewModel : ViewModelBase
 {
     private readonly ConfigService _configService;
+    private readonly LocalizationService? _localizationService;
 
     private int _cpuThreshold;
     private int _memoryThreshold;
@@ -18,6 +19,7 @@ public class SettingsViewModel : ViewModelBase
     private string _memoryColor = "#FF8C00";
     private string _breathSpeed = "medium";
     private bool _autoStart;
+    private string _language = "zh-CN";
 
     /// <summary>
     /// CPU 阈值 (10-100)
@@ -141,6 +143,21 @@ public class SettingsViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// 当前语言
+    /// </summary>
+    public string Language
+    {
+        get => _language;
+        set
+        {
+            if (SetProperty(ref _language, value))
+            {
+                ApplySettings();
+            }
+        }
+    }
+
+    /// <summary>
     /// 预设颜色列表
     /// </summary>
     public string[] PresetColors { get; } = new[]
@@ -162,12 +179,17 @@ public class SettingsViewModel : ViewModelBase
     /// <summary>
     /// 呼吸灯速度选项
     /// </summary>
-    public BreathSpeedOption[] BreathSpeedOptions { get; } = new[]
+    public BreathSpeedOption[] BreathSpeedOptions { get; private set; } = new[]
     {
         new BreathSpeedOption("slow", "慢"),
         new BreathSpeedOption("medium", "中"),
         new BreathSpeedOption("fast", "快")
     };
+
+    /// <summary>
+    /// 语言选项
+    /// </summary>
+    public List<LanguageOption> LanguageOptions { get; private set; } = new();
 
     /// <summary>
     /// 选择 CPU 颜色命令
@@ -184,13 +206,30 @@ public class SettingsViewModel : ViewModelBase
     /// </summary>
     public ICommand ResetCommand { get; }
 
-    public SettingsViewModel(ConfigService configService)
+    public SettingsViewModel(ConfigService configService, LocalizationService? localizationService = null)
     {
         _configService = configService ?? throw new ArgumentNullException(nameof(configService));
+        _localizationService = localizationService;
 
         SelectCpuColorCommand = new RelayCommand(color => CpuColor = (string)color!);
         SelectMemoryColorCommand = new RelayCommand(color => MemoryColor = (string)color!);
         ResetCommand = new RelayCommand(Reset);
+
+        // 初始化语言选项
+        LanguageOptions = _localizationService?.SupportedLanguages ?? new List<LanguageOption>
+        {
+            new LanguageOption("zh-CN", "中文"),
+            new LanguageOption("en-US", "English")
+        };
+
+        // 初始化呼吸灯速度选项（使用本地化）
+        UpdateBreathSpeedOptions();
+
+        // 订阅语言变更事件（如果本地化服务可用）
+        if (_localizationService != null)
+        {
+            _localizationService.LanguageChanged += OnLanguageChanged;
+        }
     }
 
     /// <summary>
@@ -209,6 +248,7 @@ public class SettingsViewModel : ViewModelBase
         _memoryColor = config.MemoryColor;
         _breathSpeed = config.BreathSpeed;
         _autoStart = config.AutoStart;
+        _language = config.Language;
 
         // 通知 UI 更新
         OnPropertyChanged(nameof(CpuThreshold));
@@ -219,6 +259,7 @@ public class SettingsViewModel : ViewModelBase
         OnPropertyChanged(nameof(MemoryColor));
         OnPropertyChanged(nameof(BreathSpeed));
         OnPropertyChanged(nameof(AutoStart));
+        OnPropertyChanged(nameof(Language));
     }
 
     /// <summary>
@@ -236,6 +277,7 @@ public class SettingsViewModel : ViewModelBase
             config.MemoryColor = _memoryColor;
             config.BreathSpeed = _breathSpeed;
             config.AutoStart = _autoStart;
+            config.Language = _language;
         });
     }
 
@@ -246,6 +288,45 @@ public class SettingsViewModel : ViewModelBase
     {
         _configService.Reset();
         LoadFromConfig();
+    }
+
+    /// <summary>
+    /// 语言变更事件处理
+    /// </summary>
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        UpdateBreathSpeedOptions();
+        OnPropertyChanged(nameof(BreathSpeedOptions));
+    }
+
+    /// <summary>
+    /// 更新呼吸灯速度选项（使用本地化字符串）
+    /// </summary>
+    private void UpdateBreathSpeedOptions()
+    {
+        string GetLocalizedString(string key)
+        {
+            if (_localizationService != null)
+            {
+                return _localizationService.GetString(key);
+            }
+
+            // 回退到默认值
+            return key switch
+            {
+                "SpeedSlow" => "慢",
+                "SpeedMedium" => "中",
+                "SpeedFast" => "快",
+                _ => key
+            };
+        }
+
+        BreathSpeedOptions = new[]
+        {
+            new BreathSpeedOption("slow", GetLocalizedString("SpeedSlow")),
+            new BreathSpeedOption("medium", GetLocalizedString("SpeedMedium")),
+            new BreathSpeedOption("fast", GetLocalizedString("SpeedFast"))
+        };
     }
 }
 

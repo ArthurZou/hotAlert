@@ -2,6 +2,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using HotAlert.Helpers;
 using HotAlert.Models;
+using HotAlert.Services;
 using Color = System.Windows.Media.Color;
 using Colors = System.Windows.Media.Colors;
 using Duration = System.Windows.Duration;
@@ -247,11 +248,13 @@ public partial class BorderOverlayWindow : Window
         var parts = new List<string>();
         if (_cpuVisible)
         {
-            parts.Add($"CPU: {_cpuUsage:F0}%");
+            var cpuLabel = App.Current.LocalizationService.GetString("TooltipCpu");
+            parts.Add($"{cpuLabel}: {_cpuUsage:F0}%");
         }
         if (_memoryVisible)
         {
-            parts.Add($"Memory: {_memoryUsage:F0}%");
+            var memoryLabel = App.Current.LocalizationService.GetString("TooltipMemory");
+            parts.Add($"{memoryLabel}: {_memoryUsage:F0}%");
         }
         TooltipText.Text = string.Join(" | ", parts);
     }

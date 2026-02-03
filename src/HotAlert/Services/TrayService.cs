@@ -16,12 +16,16 @@ public class TrayService : IDisposable
     private readonly NotifyIcon _notifyIcon;
     private readonly AlertService _alertService;
     private readonly ConfigService _configService;
+    private readonly LocalizationService _localizationService;
     private readonly Icon _normalIcon;
     private readonly Icon _warningIcon;
     private readonly IntPtr _normalIconHandle;
     private readonly IntPtr _warningIconHandle;
     private readonly ContextMenuStrip _contextMenu;
     private readonly ToolStripMenuItem _dismissMenuItem;
+    private readonly ToolStripMenuItem _languageMenuItem;
+    private readonly ToolStripMenuItem _languageChineseMenuItem;
+    private readonly ToolStripMenuItem _languageEnglishMenuItem;
 
     private bool _disposed;
 
@@ -35,10 +39,11 @@ public class TrayService : IDisposable
     /// </summary>
     public event EventHandler? ExitRequested;
 
-    public TrayService(AlertService alertService, ConfigService configService)
+    public TrayService(AlertService alertService, ConfigService configService, LocalizationService localizationService)
     {
         _alertService = alertService ?? throw new ArgumentNullException(nameof(alertService));
         _configService = configService ?? throw new ArgumentNullException(nameof(configService));
+        _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
 
         // 创建图标
         (_normalIcon, _normalIconHandle) = CreateIcon(Color.FromArgb(76, 175, 80));   // 绿色
@@ -47,18 +52,31 @@ public class TrayService : IDisposable
         // 创建右键菜单
         _contextMenu = new ContextMenuStrip();
 
-        _dismissMenuItem = new ToolStripMenuItem("关闭警告");
+        _dismissMenuItem = new ToolStripMenuItem(_localizationService.GetString("MenuDismiss"));
         _dismissMenuItem.Click += OnDismissClick;
         _dismissMenuItem.Enabled = false;
         _contextMenu.Items.Add(_dismissMenuItem);
 
-        var settingsMenuItem = new ToolStripMenuItem("设置...");
+        var settingsMenuItem = new ToolStripMenuItem(_localizationService.GetString("MenuSettings"));
         settingsMenuItem.Click += OnSettingsClick;
         _contextMenu.Items.Add(settingsMenuItem);
 
+        // 语言子菜单
+        _languageMenuItem = new ToolStripMenuItem(_localizationService.GetString("MenuLanguage"));
+        _languageChineseMenuItem = new ToolStripMenuItem(_localizationService.GetString("LanguageChinese"));
+        _languageChineseMenuItem.Tag = "zh-CN";
+        _languageChineseMenuItem.Click += OnLanguageClick;
+        _languageEnglishMenuItem = new ToolStripMenuItem(_localizationService.GetString("LanguageEnglish"));
+        _languageEnglishMenuItem.Tag = "en-US";
+        _languageEnglishMenuItem.Click += OnLanguageClick;
+
+        _languageMenuItem.DropDownItems.Add(_languageChineseMenuItem);
+        _languageMenuItem.DropDownItems.Add(_languageEnglishMenuItem);
+        _contextMenu.Items.Add(_languageMenuItem);
+
         _contextMenu.Items.Add(new ToolStripSeparator());
 
-        var exitMenuItem = new ToolStripMenuItem("退出");
+        var exitMenuItem = new ToolStripMenuItem(_localizationService.GetString("MenuExit"));
         exitMenuItem.Click += OnExitClick;
         _contextMenu.Items.Add(exitMenuItem);
 
@@ -66,7 +84,7 @@ public class TrayService : IDisposable
         _notifyIcon = new NotifyIcon
         {
             Icon = _normalIcon,
-            Text = "HotAlert - 系统资源监控",
+            Text = _localizationService.GetString("TrayTooltip"),
             Visible = true,
             ContextMenuStrip = _contextMenu
         };
@@ -76,6 +94,9 @@ public class TrayService : IDisposable
 
         // 订阅警告状态变更事件
         _alertService.AlertStateChanged += OnAlertStateChanged;
+
+        // 订阅语言变更事件
+        _localizationService.LanguageChanged += OnLanguageChanged;
     }
 
     /// <summary>
@@ -121,11 +142,11 @@ public class TrayService : IDisposable
             var parts = new List<string>();
             if (state.Type.HasFlag(AlertType.Cpu))
             {
-                parts.Add($"CPU: {state.CpuUsage:F1}%");
+                parts.Add($"{_localizationService.GetString("TooltipCpu")}: {state.CpuUsage:F1}%");
             }
             if (state.Type.HasFlag(AlertType.Memory))
             {
-                parts.Add($"内存: {state.MemoryUsage:F1}%");
+                parts.Add($"{_localizationService.GetString("TooltipMemory")}: {state.MemoryUsage:F1}%");
             }
             text = string.Join(" | ", parts);
         }
@@ -174,12 +195,59 @@ public class TrayService : IDisposable
         ExitRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    private void OnLanguageClick(object? sender, EventArgs e)
+    {
+        if (sender is ToolStripMenuItem menuItem && menuItem.Tag is string languageCode)
+        {
+            _localizationService.SetLanguage(languageCode);
+        }
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        // 在 UI 线程更新菜单文本
+        if (_contextMenu.InvokeRequired)
+        {
+            _contextMenu.Invoke(UpdateMenuText);
+        }
+        else
+        {
+            UpdateMenuText();
+        }
+    }
+
+    private void UpdateMenuText()
+    {
+        _dismissMenuItem.Text = _localizationService.GetString("MenuDismiss");
+
+        // 更新设置菜单
+        if (_contextMenu.Items.Count > 1 && _contextMenu.Items[1] is ToolStripMenuItem settingsItem)
+        {
+            settingsItem.Text = _localizationService.GetString("MenuSettings");
+        }
+
+        // 更新语言菜单
+        _languageMenuItem.Text = _localizationService.GetString("MenuLanguage");
+        _languageChineseMenuItem.Text = _localizationService.GetString("LanguageChinese");
+        _languageEnglishMenuItem.Text = _localizationService.GetString("LanguageEnglish");
+
+        // 更新退出菜单（最后一项）
+        if (_contextMenu.Items.Count > 0 && _contextMenu.Items[_contextMenu.Items.Count - 1] is ToolStripMenuItem exitItem)
+        {
+            exitItem.Text = _localizationService.GetString("MenuExit");
+        }
+
+        // 更新托盘提示文本
+        _notifyIcon.Text = _localizationService.GetString("TrayTooltip");
+    }
+
     public void Dispose()
     {
         if (_disposed) return;
         _disposed = true;
 
         _alertService.AlertStateChanged -= OnAlertStateChanged;
+        _localizationService.LanguageChanged -= OnLanguageChanged;
 
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
