@@ -8,9 +8,12 @@ HotAlert is a Windows desktop CPU/memory monitoring tool that displays colored b
 
 ## Technology Stack
 
-- **Framework**: C# WPF (.NET 6+)
+- **Framework**: C# WPF (.NET 8.0-windows)
 - **Platform**: Windows 10/11
 - **UI Style**: Windows native style, follows system theme
+- **Architecture**: MVVM (Model-View-ViewModel)
+- **Configuration**: JSON (System.Text.Json)
+- **System Monitoring**: PerformanceCounter API + Win32 API
 
 ## Build and Run Commands
 
@@ -36,24 +39,56 @@ dotnet test
 ### Project Structure
 ```
 HotAlert/
-├── src/HotAlert/           # Main application
-│   ├── Views/              # WPF windows (SettingsWindow, BorderOverlay)
-│   ├── ViewModels/         # MVVM view models
-│   ├── Services/           # Core services
-│   │   ├── ResourceMonitor.cs   # CPU/memory monitoring (3s interval)
-│   │   ├── AlertService.cs      # Warning border management
-│   │   └── ConfigService.cs     # Configuration persistence
-│   ├── Models/             # Data models (AppConfig)
-│   └── Resources/          # Localization (zh-CN, en-US)
-└── src/HotAlert.Installer/ # Installation package project
+├── src/HotAlert/                      # 主应用程序
+│   ├── App.xaml                       # WPF 应用程序定义
+│   ├── App.xaml.cs                    # 应用程序启动入口，初始化监控服务
+│   ├── MainWindow.xaml                # 主窗口布局
+│   ├── MainWindow.xaml.cs             # 主窗口代码后端
+│   ├── HotAlert.csproj                # 项目配置 (.NET 8.0-windows)
+│   ├── AssemblyInfo.cs                # 程序集信息和主题定义
+│   │
+│   ├── Models/                        # 数据模型层
+│   │   ├── AppConfig.cs               # 应用配置模型 (阈值、颜色、边框宽度等)
+│   │   └── ResourceUsageEventArgs.cs  # 资源使用率事件参数 (CPU/内存/时间戳)
+│   │
+│   ├── Services/                      # 业务服务层
+│   │   ├── ResourceMonitor.cs         # CPU/内存监控服务 (3秒采样间隔)
+│   │   ├── ConfigService.cs           # 配置读写服务 (JSON持久化)
+│   │   └── [AlertService.cs]          # 警告管理服务 (待实现)
+│   │
+│   ├── ViewModels/                    # MVVM ViewModel层
+│   │   ├── ViewModelBase.cs           # ViewModel基类 (INotifyPropertyChanged)
+│   │   └── RelayCommand.cs            # 通用命令实现 (ICommand)
+│   │
+│   ├── Views/                         # WPF视图/窗口 (待实现)
+│   │   ├── [SettingsWindow.xaml]      # 设置窗口
+│   │   └── [BorderOverlay.xaml]       # 边框覆盖层窗口
+│   │
+│   └── Resources/                     # 本地化资源 (待实现)
+│       ├── [Strings.zh-CN.resx]       # 中文资源文件
+│       └── [Strings.en-US.resx]       # 英文资源文件
+│
+├── src/HotAlert.Installer/            # 安装包项目 (待实现)
+├── tests/                             # 测试目录 (待实现)
+├── HotAlert.sln                       # 解决方案文件
+├── SPEC.md                            # 产品规格文档
+├── CLAUDE.md                          # Claude Code 开发指引
+└── milestone.md                       # 开发里程碑跟踪
 ```
 
 ### Key Components
 
-1. **ResourceMonitor**: Uses PerformanceCounter to sample CPU/memory every 3 seconds
-2. **BorderOverlay**: Transparent topmost windows on all monitors showing gradient warning borders
-3. **AlertService**: Manages warning state, border width calculation: `width = minWidth + (currentValue - threshold) / (100 - threshold) × (maxWidth - minWidth)`
-4. **System Tray**: Application runs minimized to tray with context menu
+**已实现:**
+1. **ResourceMonitor**: 使用 PerformanceCounter API 采集 CPU，Win32 API (GlobalMemoryStatusEx) 采集内存，3秒采样间隔，通过 `ResourceUsageChanged` 事件通知
+2. **ConfigService**: JSON 配置持久化到 `%AppData%\HotAlert\config.json`，支持加载/保存/更新/重置，配置变更触发 `ConfigChanged` 事件
+3. **ViewModelBase**: MVVM 基类，实现 `INotifyPropertyChanged`，提供 `SetProperty<T>()` 方法
+4. **RelayCommand**: 通用命令实现，支持 `canExecute` 条件
+
+**待实现:**
+1. **BorderOverlay**: 透明置顶窗口，在所有显示器上显示渐变警告边框
+2. **AlertService**: 警告状态管理，边框宽度计算: `width = minWidth + (currentValue - threshold) / (100 - threshold) × (maxWidth - minWidth)`
+3. **System Tray**: 托盘图标运行，右键菜单
+4. **SettingsWindow**: 设置界面
 
 ### Configuration
 
