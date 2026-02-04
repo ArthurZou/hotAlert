@@ -6,7 +6,7 @@
 #define MyAppPublisher "HotAlert"
 #define MyAppURL "https://github.com/yourusername/hotalert"
 #define MyAppExeName "HotAlert.exe"
-#define MySourceDir "..\publish\win-x64"
+#define MySourceDir "..\src\HotAlert\bin\Release\net8.0-windows\win-x64\publish"
 
 [Setup]
 ; 基本信息
@@ -42,13 +42,10 @@ Name: "startupicon"; Description: "{cm:AutoStartProgram,{#MyAppName}}"; GroupDes
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1
 
 [Files]
-; 主程序文件
+; 主程序文件（自包含单文件发布）
 Source: "{#MySourceDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MySourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#MySourceDir}\*.json"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-; 其他资源文件（如有）
-; Source: "{#MySourceDir}\*.config"; DestDir: "{app}"; Flags: ignoreversion
+; 本地化资源文件夹
+Source: "{#MySourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.exe"
 
 [Icons]
 ; 开始菜单图标
