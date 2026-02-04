@@ -26,12 +26,16 @@ public partial class BorderOverlayWindow : Window
 
     private Color _cpuColor = Colors.Red;
     private Color _memoryColor = Colors.Orange;
+    private Color _temperatureColor = Color.FromRgb(0x8B, 0x00, 0x00); // 深红色
     private double _cpuBorderWidth;
     private double _memoryBorderWidth;
+    private double _temperatureBorderWidth;
     private float _cpuUsage;
     private float _memoryUsage;
+    private float _cpuTemperature;
     private bool _cpuVisible;
     private bool _memoryVisible;
+    private bool _temperatureVisible;
 
     // Win32 API 常量
     private const int GWL_EXSTYLE = -20;
@@ -86,6 +90,7 @@ public partial class BorderOverlayWindow : Window
     {
         UpdateCpuBorderBrushes();
         UpdateMemoryBorderBrushes();
+        UpdateTemperatureBorderBrushes();
     }
 
     /// <summary>
@@ -107,14 +112,25 @@ public partial class BorderOverlayWindow : Window
     }
 
     /// <summary>
+    /// 设置温度警告颜色
+    /// </summary>
+    public void SetTemperatureColor(Color color)
+    {
+        _temperatureColor = color;
+        UpdateTemperatureBorderBrushes();
+    }
+
+    /// <summary>
     /// 更新警告状态
     /// </summary>
     public void UpdateAlertState(AlertState state)
     {
         _cpuUsage = state.CpuUsage;
         _memoryUsage = state.MemoryUsage;
+        _cpuTemperature = state.CpuTemperature;
         _cpuVisible = state.Type.HasFlag(AlertType.Cpu);
         _memoryVisible = state.Type.HasFlag(AlertType.Memory);
+        _temperatureVisible = state.Type.HasFlag(AlertType.Temperature);
 
         // 更新 CPU 边框
         if (_cpuVisible && Math.Abs(_cpuBorderWidth - state.CpuBorderWidth) > 0.1)
@@ -132,15 +148,20 @@ public partial class BorderOverlayWindow : Window
         }
         MemoryBorderGrid.Visibility = _memoryVisible ? Visibility.Visible : Visibility.Collapsed;
 
-        // 设置内存边框的边距（在 CPU 边框内侧）
-        if (_cpuVisible && _memoryVisible)
+        // 更新温度边框
+        if (_temperatureVisible && Math.Abs(_temperatureBorderWidth - state.TemperatureBorderWidth) > 0.1)
         {
-            MemoryBorderGrid.Margin = new Thickness(_cpuBorderWidth);
+            _temperatureBorderWidth = state.TemperatureBorderWidth;
+            UpdateTemperatureBorderSizes();
         }
-        else
-        {
-            MemoryBorderGrid.Margin = new Thickness(0);
-        }
+        TemperatureBorderGrid.Visibility = _temperatureVisible ? Visibility.Visible : Visibility.Collapsed;
+
+        // 计算边距：外层 -> 中层 -> 内层
+        double memoryMargin = _cpuVisible ? _cpuBorderWidth : 0;
+        double temperatureMargin = memoryMargin + (_memoryVisible ? _memoryBorderWidth : 0);
+
+        MemoryBorderGrid.Margin = new Thickness(memoryMargin);
+        TemperatureBorderGrid.Margin = new Thickness(temperatureMargin);
 
         UpdateTooltipText();
     }
@@ -152,8 +173,10 @@ public partial class BorderOverlayWindow : Window
     {
         _cpuVisible = false;
         _memoryVisible = false;
+        _temperatureVisible = false;
         CpuBorderGrid.Visibility = Visibility.Collapsed;
         MemoryBorderGrid.Visibility = Visibility.Collapsed;
+        TemperatureBorderGrid.Visibility = Visibility.Collapsed;
     }
 
     /// <summary>
@@ -230,6 +253,14 @@ public partial class BorderOverlayWindow : Window
         SetGradientBrush(MemoryRightBorder, _memoryColor, GradientDirection.RightToLeft);
     }
 
+    private void UpdateTemperatureBorderBrushes()
+    {
+        SetGradientBrush(TemperatureTopBorder, _temperatureColor, GradientDirection.TopToBottom);
+        SetGradientBrush(TemperatureBottomBorder, _temperatureColor, GradientDirection.BottomToTop);
+        SetGradientBrush(TemperatureLeftBorder, _temperatureColor, GradientDirection.LeftToRight);
+        SetGradientBrush(TemperatureRightBorder, _temperatureColor, GradientDirection.RightToLeft);
+    }
+
     private void UpdateCpuBorderSizes()
     {
         CpuTopBorder.Height = _cpuBorderWidth;
@@ -246,6 +277,14 @@ public partial class BorderOverlayWindow : Window
         MemoryRightBorder.Width = _memoryBorderWidth;
     }
 
+    private void UpdateTemperatureBorderSizes()
+    {
+        TemperatureTopBorder.Height = _temperatureBorderWidth;
+        TemperatureBottomBorder.Height = _temperatureBorderWidth;
+        TemperatureLeftBorder.Width = _temperatureBorderWidth;
+        TemperatureRightBorder.Width = _temperatureBorderWidth;
+    }
+
     private void UpdateTooltipText()
     {
         var parts = new List<string>();
@@ -258,6 +297,11 @@ public partial class BorderOverlayWindow : Window
         {
             var memoryLabel = App.Current.LocalizationService.GetString("TooltipMemory");
             parts.Add($"{memoryLabel}: {_memoryUsage:F0}%");
+        }
+        if (_temperatureVisible)
+        {
+            var tempLabel = App.Current.LocalizationService.GetString("TooltipTemperature");
+            parts.Add($"{tempLabel}: {_cpuTemperature:F0}°C");
         }
         TooltipText.Text = string.Join(" | ", parts);
     }

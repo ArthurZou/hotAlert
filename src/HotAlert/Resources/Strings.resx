@@ -85,6 +85,9 @@
   <data name="LabelMemoryThreshold" xml:space="preserve">
     <value>内存阈值</value>
   </data>
+  <data name="LabelCpuTemperatureThreshold" xml:space="preserve">
+    <value>CPU 温度阈值</value>
+  </data>
   <data name="LabelMinWidth" xml:space="preserve">
     <value>最小宽度</value>
   </data>
@@ -96,6 +99,9 @@
   </data>
   <data name="LabelMemoryColor" xml:space="preserve">
     <value>内存警告颜色</value>
+  </data>
+  <data name="LabelCpuTemperatureColor" xml:space="preserve">
+    <value>CPU 温度警告颜色</value>
   </data>
   <data name="LabelBreathSpeed" xml:space="preserve">
     <value>呼吸灯速度</value>
@@ -138,6 +144,9 @@
   </data>
   <data name="TooltipMemory" xml:space="preserve">
     <value>内存</value>
+  </data>
+  <data name="TooltipTemperature" xml:space="preserve">
+    <value>温度</value>
   </data>
   <data name="LanguageChinese" xml:space="preserve">
     <value>中文</value>

@@ -28,12 +28,20 @@
             <Rectangle x:Name="CpuRightBorder" HorizontalAlignment="Right"/>
         </Grid>
 
-        <!-- 内存边框（内层） -->
+        <!-- 内存边框（中层） -->
         <Grid x:Name="MemoryBorderGrid" Visibility="Collapsed">
             <Rectangle x:Name="MemoryTopBorder" VerticalAlignment="Top"/>
             <Rectangle x:Name="MemoryBottomBorder" VerticalAlignment="Bottom"/>
             <Rectangle x:Name="MemoryLeftBorder" HorizontalAlignment="Left"/>
             <Rectangle x:Name="MemoryRightBorder" HorizontalAlignment="Right"/>
+        </Grid>
+
+        <!-- 温度边框（最内层） -->
+        <Grid x:Name="TemperatureBorderGrid" Visibility="Collapsed">
+            <Rectangle x:Name="TemperatureTopBorder" VerticalAlignment="Top"/>
+            <Rectangle x:Name="TemperatureBottomBorder" VerticalAlignment="Bottom"/>
+            <Rectangle x:Name="TemperatureLeftBorder" HorizontalAlignment="Left"/>
+            <Rectangle x:Name="TemperatureRightBorder" HorizontalAlignment="Right"/>
         </Grid>
 
         <!-- 悬浮提示 -->

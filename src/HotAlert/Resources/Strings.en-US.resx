@@ -85,6 +85,9 @@
   <data name="LabelMemoryThreshold" xml:space="preserve">
     <value>Memory Threshold</value>
   </data>
+  <data name="LabelCpuTemperatureThreshold" xml:space="preserve">
+    <value>CPU Temp Threshold</value>
+  </data>
   <data name="LabelMinWidth" xml:space="preserve">
     <value>Min Width</value>
   </data>
@@ -96,6 +99,9 @@
   </data>
   <data name="LabelMemoryColor" xml:space="preserve">
     <value>Memory Warning Color</value>
+  </data>
+  <data name="LabelCpuTemperatureColor" xml:space="preserve">
+    <value>CPU Temp Warning Color</value>
   </data>
   <data name="LabelBreathSpeed" xml:space="preserve">
     <value>Breath Speed</value>
@@ -138,6 +144,9 @@
   </data>
   <data name="TooltipMemory" xml:space="preserve">
     <value>Memory</value>
+  </data>
+  <data name="TooltipTemperature" xml:space="preserve">
+    <value>Temp</value>
   </data>
   <data name="LanguageChinese" xml:space="preserve">
     <value>中文</value>

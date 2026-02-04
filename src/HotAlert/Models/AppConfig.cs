@@ -49,4 +49,14 @@ public class AppConfig
     /// 语言: zh-CN, en-US
     /// </summary>
     public string Language { get; set; } = "zh-CN";
+
+    /// <summary>
+    /// CPU 温度阈值 (摄氏度)
+    /// </summary>
+    public int CpuTemperatureThreshold { get; set; } = 80;
+
+    /// <summary>
+    /// CPU 温度警告颜色
+    /// </summary>
+    public string CpuTemperatureColor { get; set; } = "#8B0000";
 }

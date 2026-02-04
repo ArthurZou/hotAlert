@@ -24,7 +24,12 @@ public enum AlertType
     /// <summary>
     /// CPU 和内存同时警告
     /// </summary>
-    Both = Cpu | Memory
+    Both = Cpu | Memory,
+
+    /// <summary>
+    /// CPU 温度警告
+    /// </summary>
+    Temperature = 4
 }
 
 /// <summary>
@@ -56,4 +61,14 @@ public class AlertState
     /// 内存边框宽度
     /// </summary>
     public double MemoryBorderWidth { get; set; }
+
+    /// <summary>
+    /// CPU 温度 (摄氏度)
+    /// </summary>
+    public float CpuTemperature { get; set; }
+
+    /// <summary>
+    /// 温度边框宽度
+    /// </summary>
+    public double TemperatureBorderWidth { get; set; }
 }

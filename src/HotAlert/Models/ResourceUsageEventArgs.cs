@@ -20,10 +20,16 @@ public class ResourceUsageEventArgs : EventArgs
     /// </summary>
     public DateTime Timestamp { get; }
 
-    public ResourceUsageEventArgs(float cpuUsage, float memoryUsage)
+    /// <summary>
+    /// CPU 温度 (摄氏度)
+    /// </summary>
+    public float CpuTemperature { get; }
+
+    public ResourceUsageEventArgs(float cpuUsage, float memoryUsage, float cpuTemperature = 0)
     {
         CpuUsage = cpuUsage;
         MemoryUsage = memoryUsage;
+        CpuTemperature = cpuTemperature;
         Timestamp = DateTime.Now;
     }
 }

@@ -13,10 +13,12 @@ public class SettingsViewModel : ViewModelBase
 
     private int _cpuThreshold;
     private int _memoryThreshold;
+    private int _cpuTemperatureThreshold;
     private int _borderMinWidth;
     private int _borderMaxWidth;
     private string _cpuColor = "#FF4444";
     private string _memoryColor = "#FF8C00";
+    private string _cpuTemperatureColor = "#8B0000";
     private string _breathSpeed = "medium";
     private bool _autoStart;
     private string _language = "zh-CN";
@@ -45,6 +47,21 @@ public class SettingsViewModel : ViewModelBase
         set
         {
             if (SetProperty(ref _memoryThreshold, Math.Clamp(value, 10, 100)))
+            {
+                ApplySettings();
+            }
+        }
+    }
+
+    /// <summary>
+    /// CPU 温度阈值 (60-100)
+    /// </summary>
+    public int CpuTemperatureThreshold
+    {
+        get => _cpuTemperatureThreshold;
+        set
+        {
+            if (SetProperty(ref _cpuTemperatureThreshold, Math.Clamp(value, 60, 100)))
             {
                 ApplySettings();
             }
@@ -105,6 +122,21 @@ public class SettingsViewModel : ViewModelBase
         set
         {
             if (SetProperty(ref _memoryColor, value))
+            {
+                ApplySettings();
+            }
+        }
+    }
+
+    /// <summary>
+    /// CPU 温度警告颜色
+    /// </summary>
+    public string CpuTemperatureColor
+    {
+        get => _cpuTemperatureColor;
+        set
+        {
+            if (SetProperty(ref _cpuTemperatureColor, value))
             {
                 ApplySettings();
             }
@@ -202,6 +234,11 @@ public class SettingsViewModel : ViewModelBase
     public ICommand SelectMemoryColorCommand { get; }
 
     /// <summary>
+    /// 选择温度颜色命令
+    /// </summary>
+    public ICommand SelectTemperatureColorCommand { get; }
+
+    /// <summary>
     /// 恢复默认设置命令
     /// </summary>
     public ICommand ResetCommand { get; }
@@ -213,6 +250,7 @@ public class SettingsViewModel : ViewModelBase
 
         SelectCpuColorCommand = new RelayCommand(color => CpuColor = (string)color!);
         SelectMemoryColorCommand = new RelayCommand(color => MemoryColor = (string)color!);
+        SelectTemperatureColorCommand = new RelayCommand(color => CpuTemperatureColor = (string)color!);
         ResetCommand = new RelayCommand(Reset);
 
         // 初始化语言选项
@@ -242,10 +280,12 @@ public class SettingsViewModel : ViewModelBase
         // 直接设置字段避免触发 ApplySettings
         _cpuThreshold = config.CpuThreshold;
         _memoryThreshold = config.MemoryThreshold;
+        _cpuTemperatureThreshold = config.CpuTemperatureThreshold;
         _borderMinWidth = config.BorderMinWidth;
         _borderMaxWidth = config.BorderMaxWidth;
         _cpuColor = config.CpuColor;
         _memoryColor = config.MemoryColor;
+        _cpuTemperatureColor = config.CpuTemperatureColor;
         _breathSpeed = config.BreathSpeed;
         _autoStart = config.AutoStart;
         _language = config.Language;
@@ -253,10 +293,12 @@ public class SettingsViewModel : ViewModelBase
         // 通知 UI 更新
         OnPropertyChanged(nameof(CpuThreshold));
         OnPropertyChanged(nameof(MemoryThreshold));
+        OnPropertyChanged(nameof(CpuTemperatureThreshold));
         OnPropertyChanged(nameof(BorderMinWidth));
         OnPropertyChanged(nameof(BorderMaxWidth));
         OnPropertyChanged(nameof(CpuColor));
         OnPropertyChanged(nameof(MemoryColor));
+        OnPropertyChanged(nameof(CpuTemperatureColor));
         OnPropertyChanged(nameof(BreathSpeed));
         OnPropertyChanged(nameof(AutoStart));
         OnPropertyChanged(nameof(Language));
@@ -271,10 +313,12 @@ public class SettingsViewModel : ViewModelBase
         {
             config.CpuThreshold = _cpuThreshold;
             config.MemoryThreshold = _memoryThreshold;
+            config.CpuTemperatureThreshold = _cpuTemperatureThreshold;
             config.BorderMinWidth = _borderMinWidth;
             config.BorderMaxWidth = _borderMaxWidth;
             config.CpuColor = _cpuColor;
             config.MemoryColor = _memoryColor;
+            config.CpuTemperatureColor = _cpuTemperatureColor;
             config.BreathSpeed = _breathSpeed;
             config.AutoStart = _autoStart;
             config.Language = _language;

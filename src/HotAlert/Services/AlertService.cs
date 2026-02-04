@@ -22,8 +22,10 @@ public class AlertService : IDisposable
     private bool _disposed;
     private bool _cpuAlertDismissed;
     private bool _memoryAlertDismissed;
+    private bool _temperatureAlertDismissed;
     private bool _cpuWasBelowThreshold = true;
     private bool _memoryWasBelowThreshold = true;
+    private bool _temperatureWasBelowThreshold = true;
 
     /// <summary>
     /// 当前警告状态
@@ -60,6 +62,7 @@ public class AlertService : IDisposable
     {
         _cpuAlertDismissed = CurrentState.Type.HasFlag(AlertType.Cpu);
         _memoryAlertDismissed = CurrentState.Type.HasFlag(AlertType.Memory);
+        _temperatureAlertDismissed = CurrentState.Type.HasFlag(AlertType.Temperature);
 
         HideAllWindows();
 
@@ -67,7 +70,8 @@ public class AlertService : IDisposable
         {
             Type = AlertType.None,
             CpuUsage = CurrentState.CpuUsage,
-            MemoryUsage = CurrentState.MemoryUsage
+            MemoryUsage = CurrentState.MemoryUsage,
+            CpuTemperature = CurrentState.CpuTemperature
         };
 
         AlertStateChanged?.Invoke(this, CurrentState);
@@ -116,6 +120,19 @@ public class AlertService : IDisposable
             _memoryWasBelowThreshold = false;
         }
 
+        if (e.CpuTemperature < config.CpuTemperatureThreshold)
+        {
+            if (!_temperatureWasBelowThreshold)
+            {
+                _temperatureAlertDismissed = false;
+            }
+            _temperatureWasBelowThreshold = true;
+        }
+        else
+        {
+            _temperatureWasBelowThreshold = false;
+        }
+
         // 计算警告类型
         var alertType = AlertType.None;
 
@@ -129,6 +146,11 @@ public class AlertService : IDisposable
             alertType |= AlertType.Memory;
         }
 
+        if (e.CpuTemperature >= config.CpuTemperatureThreshold && !_temperatureAlertDismissed)
+        {
+            alertType |= AlertType.Temperature;
+        }
+
         // 计算边框宽度
         var cpuBorderWidth = alertType.HasFlag(AlertType.Cpu)
             ? CalculateBorderWidth(e.CpuUsage, config.CpuThreshold, config.BorderMinWidth, config.BorderMaxWidth)
@@ -138,13 +160,20 @@ public class AlertService : IDisposable
             ? CalculateBorderWidth(e.MemoryUsage, config.MemoryThreshold, config.BorderMinWidth, config.BorderMaxWidth)
             : 0;
 
+        // 温度使用不同的比例：阈值-100°C 映射到边框宽度
+        var temperatureBorderWidth = alertType.HasFlag(AlertType.Temperature)
+            ? CalculateBorderWidth(e.CpuTemperature, config.CpuTemperatureThreshold, config.BorderMinWidth, config.BorderMaxWidth)
+            : 0;
+
         CurrentState = new AlertState
         {
             Type = alertType,
             CpuUsage = e.CpuUsage,
             MemoryUsage = e.MemoryUsage,
+            CpuTemperature = e.CpuTemperature,
             CpuBorderWidth = cpuBorderWidth,
-            MemoryBorderWidth = memoryBorderWidth
+            MemoryBorderWidth = memoryBorderWidth,
+            TemperatureBorderWidth = temperatureBorderWidth
         };
 
         // 在 UI 线程更新窗口
@@ -159,11 +188,13 @@ public class AlertService : IDisposable
         {
             var cpuColor = ParseColor(config.CpuColor, Colors.Red);
             var memoryColor = ParseColor(config.MemoryColor, Colors.Orange);
+            var temperatureColor = ParseColor(config.CpuTemperatureColor, Color.FromRgb(0x8B, 0x00, 0x00));
 
             foreach (var window in _overlayWindows)
             {
                 window.SetCpuColor(cpuColor);
                 window.SetMemoryColor(memoryColor);
+                window.SetTemperatureColor(temperatureColor);
                 window.SetBreathSpeed(config.BreathSpeed);
             }
         });
@@ -212,11 +243,14 @@ public class AlertService : IDisposable
             var cpuColor = ParseColor(config.CpuColor, Colors.Red);
             var memoryColor = ParseColor(config.MemoryColor, Colors.Orange);
 
+            var temperatureColor = ParseColor(config.CpuTemperatureColor, Color.FromRgb(0x8B, 0x00, 0x00));
+
             foreach (var screen in screens)
             {
                 var window = new BorderOverlayWindow(screen);
                 window.SetCpuColor(cpuColor);
                 window.SetMemoryColor(memoryColor);
+                window.SetTemperatureColor(temperatureColor);
                 window.SetBreathSpeed(config.BreathSpeed);
                 _overlayWindows.Add(window);
             }
@@ -256,8 +290,10 @@ public class AlertService : IDisposable
                     Type = state.Type,
                     CpuUsage = state.CpuUsage,
                     MemoryUsage = state.MemoryUsage,
+                    CpuTemperature = state.CpuTemperature,
                     CpuBorderWidth = ScreenHelper.ScaleBorderWidth(state.CpuBorderWidth, window.ScreenInfo.DpiScale),
-                    MemoryBorderWidth = ScreenHelper.ScaleBorderWidth(state.MemoryBorderWidth, window.ScreenInfo.DpiScale)
+                    MemoryBorderWidth = ScreenHelper.ScaleBorderWidth(state.MemoryBorderWidth, window.ScreenInfo.DpiScale),
+                    TemperatureBorderWidth = ScreenHelper.ScaleBorderWidth(state.TemperatureBorderWidth, window.ScreenInfo.DpiScale)
                 };
 
                 window.UpdateAlertState(scaledState);

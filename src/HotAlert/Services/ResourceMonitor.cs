@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Timers;
 using HotAlert.Models;
+using LibreHardwareMonitor.Hardware;
 using Timer = System.Timers.Timer;
 
 namespace HotAlert.Services;
@@ -15,6 +16,8 @@ public class ResourceMonitor : IDisposable
 
     private readonly PerformanceCounter _cpuCounter;
     private readonly Timer _timer;
+    private Computer? _computer;
+    private IHardware? _cpuHardware;
     private bool _disposed;
 
     /// <summary>
@@ -26,6 +29,16 @@ public class ResourceMonitor : IDisposable
     /// 当前内存使用率 (0-100)
     /// </summary>
     public float MemoryUsage { get; private set; }
+
+    /// <summary>
+    /// 当前 CPU 温度 (摄氏度)
+    /// </summary>
+    public float CpuTemperature { get; private set; }
+
+    /// <summary>
+    /// 温度监控是否可用
+    /// </summary>
+    public bool IsTemperatureAvailable { get; private set; }
 
     /// <summary>
     /// 监控是否运行中
@@ -55,7 +68,28 @@ public class ResourceMonitor : IDisposable
         // 预热 CPU 计数器，首次调用返回 0
         _cpuCounter.NextValue();
 
+        // 初始化温度监控
+        InitializeTemperatureMonitor();
+
         _timer.Start();
+    }
+
+    /// <summary>
+    /// 初始化温度监控
+    /// </summary>
+    private void InitializeTemperatureMonitor()
+    {
+        try
+        {
+            _computer = new Computer { IsCpuEnabled = true };
+            _computer.Open();
+            _cpuHardware = _computer.Hardware.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu);
+            IsTemperatureAvailable = _cpuHardware != null;
+        }
+        catch
+        {
+            IsTemperatureAvailable = false;
+        }
     }
 
     /// <summary>
@@ -75,14 +109,38 @@ public class ResourceMonitor : IDisposable
         _timer.Elapsed -= OnTimerElapsed;
         _timer.Dispose();
         _cpuCounter.Dispose();
+        _computer?.Close();
     }
 
     private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
     {
         CpuUsage = _cpuCounter.NextValue();
         MemoryUsage = GetMemoryUsage();
+        CpuTemperature = GetCpuTemperature();
 
-        ResourceUsageChanged?.Invoke(this, new ResourceUsageEventArgs(CpuUsage, MemoryUsage));
+        ResourceUsageChanged?.Invoke(this, new ResourceUsageEventArgs(CpuUsage, MemoryUsage, CpuTemperature));
+    }
+
+    /// <summary>
+    /// 获取 CPU 温度
+    /// </summary>
+    private float GetCpuTemperature()
+    {
+        if (_cpuHardware == null) return 0;
+
+        try
+        {
+            _cpuHardware.Update();
+            var tempSensor = _cpuHardware.Sensors
+                .Where(s => s.SensorType == SensorType.Temperature)
+                .FirstOrDefault(s => s.Name.Contains("Package") || s.Name.Contains("Core"));
+
+            return tempSensor?.Value ?? 0;
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     /// <summary>
